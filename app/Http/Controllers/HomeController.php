@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Category;
+use App\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,7 +16,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
     }
 
     /**
@@ -29,7 +31,15 @@ class HomeController extends Controller
         } else {
             return redirect()->route('user.dashboard');
         }
+    }
 
-        
+    public function welcome()
+    {
+        $products = Product::latest()->take(10)->get();
+        $categories = Category::orderBy('name', 'asc')->get();
+
+        return view('welcome', compact('products', 'categories'));
+
+
     }
 }
