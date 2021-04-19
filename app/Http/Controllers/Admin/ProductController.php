@@ -34,6 +34,7 @@ class ProductController extends Controller
         $categories = Category::orderBy('name', 'asc')->get();
 
         return view('admin.add_product', compact('categories'));
+
     }
 
     /**
@@ -68,7 +69,6 @@ class ProductController extends Controller
         $product->image = $file_name;
         $product->slug = \Str::slug($request->name);
         $product->save();
-
 
         foreach ($request->categories as $category) {
             $cp = new CategoryProduct();
@@ -106,7 +106,8 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        //
+        $products= Product::orderby('image','asc')->get();
+        return view('admin.view_product', compact('products'));
     }
 
     /**
@@ -117,7 +118,8 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        //
+
+        return view('admin.edit_product', compact('product'));
     }
 
     /**
@@ -129,7 +131,36 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'price' => 'required',
+            'description' => 'required',
+            'quantity' => 'required',
+            'tags' => 'required',
+
+        ]);
+
+        if ($request->has('image')) {
+            $file = $request->image;
+            $extension = $file->getClientOriginalExtension();
+            $file_name = $request->name.time(). '.' . $extension;
+            Storage::put('public/products/' . $file_name, fopen($file, 'r+'));
+            $product->image = $file_name;
+        }
+
+
+
+        
+        $product->name = $request->name;
+        $product->price = $request->price;
+        $product->description = $request->description;
+        $product->quantity = $request->quantity;
+        $product->tags = $request->tags;
+
+        $product->slug = \Str::slug($request->name);
+        $product->save();
+
+        return back()->with(['success' => 'Product uploaded']);
     }
 
     /**
